@@ -22,8 +22,13 @@ export const api = {
   getProfile: (id: string) => req(`/profiles/${id}`),
   verifyPin: (profile_id: string, pin: string) =>
     req('/profiles/verify-pin', { method: 'POST', body: JSON.stringify({ profile_id, pin }) }),
+  changePin: (profile_id: string, new_pin: string, boss_pin: string) =>
+    req('/profiles/change-pin', { method: 'POST', body: JSON.stringify({ profile_id, new_pin, boss_pin }) }),
   updateProfile: (id: string, body: any) =>
     req(`/profiles/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  generateAvatar: (profile_id: string, prompt: string) =>
+    req('/profiles/generate-avatar', { method: 'POST', body: JSON.stringify({ profile_id, prompt }) }),
+  clearAvatarImage: (id: string) => req(`/profiles/${id}/avatar-image`, { method: 'DELETE' }),
 
   listQuests: (params: { category?: string; profile_id?: string } = {}) => {
     const qs = new URLSearchParams(params as any).toString();
@@ -34,8 +39,8 @@ export const api = {
     req(`/quests/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteQuest: (id: string) => req(`/quests/${id}`, { method: 'DELETE' }),
 
-  submitCompletion: (quest_id: string, profile_id: string, use_double_xp = false) =>
-    req('/completions', { method: 'POST', body: JSON.stringify({ quest_id, profile_id, use_double_xp }) }),
+  submitCompletion: (quest_id: string, profile_id: string, use_double_xp = false, photo?: string) =>
+    req('/completions', { method: 'POST', body: JSON.stringify({ quest_id, profile_id, use_double_xp, photo }) }),
   listCompletions: (params: { status?: string; profile_id?: string } = {}) => {
     const qs = new URLSearchParams(params as any).toString();
     return req(`/completions${qs ? '?' + qs : ''}`);
@@ -62,6 +67,7 @@ export type Profile = {
   name: string;
   role: 'kid' | 'boss';
   avatar_class: string;
+  avatar_image?: string | null;
   equipped_gear: Record<string, string | null>;
   xp: number;
   gold: number;
@@ -87,6 +93,7 @@ export type Quest = {
   assigned_to: string;
   icon: string;
   active: boolean;
+  photo_required?: boolean;
 };
 
 export type Completion = {
@@ -99,6 +106,7 @@ export type Completion = {
   xp: number;
   gold: number;
   bonus_xp: number;
+  photo?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   submitted_at: string;
   resolved_at?: string;

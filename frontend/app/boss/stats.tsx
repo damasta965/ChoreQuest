@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { api, Profile } from '../../src/api';
 import { colors, AVATAR_ASSETS, RANK_COLORS, RANK_THRESHOLDS } from '../../src/theme';
+import { AvatarView } from '../../src/AvatarView';
 import { Parchment, HeaderBanner, XPBar, SectionTitle, StoneCard } from '../../src/ui';
 
 export default function Stats() {
@@ -41,9 +42,7 @@ export default function Stats() {
           return (
             <Parchment key={p.id} style={styles.heroCard}>
               <View style={styles.heroRow}>
-                <View style={[styles.avatar, { borderColor: a.color }]}>
-                  <Text style={{ fontSize: 28 }}>{a.emoji}</Text>
-                </View>
+                <AvatarView avatarClass={p.avatar_class} avatarImage={p.avatar_image} size={60} borderWidth={3} />
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.name}>{p.name}</Text>
                   <View style={styles.rowWrap}>

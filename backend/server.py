@@ -9,9 +9,13 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timezone, date, timedelta
+import base64
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -66,6 +70,7 @@ class Profile(BaseModel):
     role: Literal["kid", "boss"]
     pin: str
     avatar_class: str = "knight"
+    avatar_image: Optional[str] = None  # base64 PNG string or None
     equipped_gear: dict = Field(default_factory=lambda: {"weapon": None, "shield": None, "helmet": None, "cape": None})
     xp: int = 0
     gold: float = 0.0  # unpaid gold
@@ -80,9 +85,15 @@ class Profile(BaseModel):
 
 class ProfileUpdate(BaseModel):
     avatar_class: Optional[str] = None
+    avatar_image: Optional[str] = None
     equipped_gear: Optional[dict] = None
     pin: Optional[str] = None
     name: Optional[str] = None
+
+class PinChange(BaseModel):
+    profile_id: str
+    new_pin: str
+    boss_pin: str  # verify boss authority
 
 class Quest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -93,6 +104,7 @@ class Quest(BaseModel):
     gold: float
     assigned_to: str = "all"  # profile_id or "all"
     icon: str = "scroll"
+    photo_required: bool = False
     active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -104,6 +116,7 @@ class QuestCreate(BaseModel):
     gold: float
     assigned_to: str = "all"
     icon: str = "scroll"
+    photo_required: bool = False
 
 class QuestUpdate(BaseModel):
     title: Optional[str] = None
@@ -113,6 +126,7 @@ class QuestUpdate(BaseModel):
     gold: Optional[float] = None
     assigned_to: Optional[str] = None
     icon: Optional[str] = None
+    photo_required: Optional[bool] = None
     active: Optional[bool] = None
 
 class Completion(BaseModel):
@@ -124,6 +138,7 @@ class Completion(BaseModel):
     profile_name: str
     xp: int
     gold: float
+    photo: Optional[str] = None  # base64 string
     status: Literal["pending", "approved", "rejected"] = "pending"
     submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     resolved_at: Optional[datetime] = None
@@ -133,6 +148,7 @@ class CompletionCreate(BaseModel):
     quest_id: str
     profile_id: str
     use_double_xp: bool = False
+    photo: Optional[str] = None
 
 class PinVerify(BaseModel):
     profile_id: str
@@ -273,6 +289,18 @@ async def verify_pin(body: PinVerify):
     doc.pop("pin", None)
     return {"ok": True, "profile": enrich_profile(doc)}
 
+@api_router.post("/profiles/change-pin")
+async def change_pin(body: PinChange):
+    boss = await db.profiles.find_one({"role": "boss"}, {"_id": 0})
+    if not boss or boss.get("pin") != body.boss_pin:
+        raise HTTPException(401, "Incorrect Boss PIN")
+    if not body.new_pin.isdigit() or len(body.new_pin) != 4:
+        raise HTTPException(400, "PIN must be 4 digits")
+    res = await db.profiles.update_one({"id": body.profile_id}, {"$set": {"pin": body.new_pin}})
+    if res.matched_count == 0:
+        raise HTTPException(404, "Profile not found")
+    return {"ok": True}
+
 @api_router.patch("/profiles/{pid}")
 async def update_profile(pid: str, body: ProfileUpdate):
     update = {k: v for k, v in body.model_dump().items() if v is not None}
@@ -281,6 +309,56 @@ async def update_profile(pid: str, body: ProfileUpdate):
     res = await db.profiles.update_one({"id": pid}, {"$set": update})
     if res.matched_count == 0:
         raise HTTPException(404, "Profile not found")
+    doc = await db.profiles.find_one({"id": pid}, {"_id": 0, "pin": 0})
+    return enrich_profile(doc)
+
+# Avatar generation
+class AvatarGenBody(BaseModel):
+    profile_id: str
+    prompt: str
+
+@api_router.post("/profiles/generate-avatar")
+async def generate_avatar(body: AvatarGenBody):
+    profile = await db.profiles.find_one({"id": body.profile_id}, {"_id": 0})
+    if not profile:
+        raise HTTPException(404, "Profile not found")
+    if not EMERGENT_LLM_KEY:
+        raise HTTPException(500, "LLM key not configured")
+
+    styled = (
+        f"A medieval fantasy RPG character portrait, waist-up, facing slightly left. "
+        f"Style: painterly digital illustration, dramatic rim lighting, parchment-paper background tone, "
+        f"deep burgundy and royal gold color palette, ornate armor details. "
+        f"Character description: {body.prompt.strip()}. "
+        f"Clean composition, square framing, heroic pose, no text."
+    )
+
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"avatar-{body.profile_id}-{uuid.uuid4()}",
+            system_message="You generate medieval fantasy character portraits for a kids' chore app. Always produce a single image.",
+        )
+        chat.with_model("gemini", "gemini-3.1-flash-image-preview").with_params(modalities=["image", "text"])
+        msg = UserMessage(text=styled)
+        _text, images = await chat.send_message_multimodal_response(msg)
+    except Exception as e:
+        logger.exception("Avatar gen failed")
+        raise HTTPException(502, f"Image generation failed: {str(e)[:120]}")
+
+    if not images:
+        raise HTTPException(502, "No image returned")
+
+    img = images[0]
+    data_uri = f"data:{img.get('mime_type', 'image/png')};base64,{img['data']}"
+
+    await db.profiles.update_one({"id": body.profile_id}, {"$set": {"avatar_image": data_uri}})
+    updated = await db.profiles.find_one({"id": body.profile_id}, {"_id": 0, "pin": 0})
+    return {"ok": True, "profile": enrich_profile(updated)}
+
+@api_router.delete("/profiles/{pid}/avatar-image")
+async def clear_avatar_image(pid: str):
+    await db.profiles.update_one({"id": pid}, {"$set": {"avatar_image": None}})
     doc = await db.profiles.find_one({"id": pid}, {"_id": 0, "pin": 0})
     return enrich_profile(doc)
 
@@ -364,6 +442,9 @@ async def submit_completion(body: CompletionCreate):
         bonus = quest["xp"]
         await db.profiles.update_one({"id": body.profile_id}, {"$inc": {"double_xp_tokens": -1}})
 
+    if quest.get("photo_required") and not body.photo:
+        raise HTTPException(400, "This quest requires a photo proof")
+
     comp = Completion(
         quest_id=quest["id"],
         quest_title=quest["title"],
@@ -372,6 +453,7 @@ async def submit_completion(body: CompletionCreate):
         profile_name=profile["name"],
         xp=quest["xp"],
         gold=quest["gold"],
+        photo=body.photo,
         bonus_xp=bonus,
     )
     await db.completions.insert_one(comp.model_dump())

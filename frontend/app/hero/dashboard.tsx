@@ -6,6 +6,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSession } from '../../src/session';
 import { api, Completion } from '../../src/api';
 import { colors, AVATAR_ASSETS, RANK_COLORS, RANK_THRESHOLDS } from '../../src/theme';
+import { AvatarView } from '../../src/AvatarView';
 import { Parchment, StoneCard, XPBar, SectionTitle, GoldButton, HeaderBanner } from '../../src/ui';
 
 export default function HeroDashboard() {
@@ -52,9 +53,7 @@ export default function HeroDashboard() {
         {/* Hero Card */}
         <Parchment style={styles.heroCard}>
           <View style={styles.heroRow}>
-            <View style={[styles.avatarShield, { borderColor: avatar.color }]}>
-              <Text style={styles.avatarEmoji}>{avatar.emoji}</Text>
-            </View>
+            <AvatarView avatarClass={profile.avatar_class} avatarImage={profile.avatar_image} size={72} borderWidth={4} />
             <View style={{ flex: 1, marginLeft: 14 }}>
               <View style={[styles.rankBadge, { backgroundColor: rankColor }]}>
                 <MaterialCommunityIcons name="shield-crown" size={14} color="#000" />

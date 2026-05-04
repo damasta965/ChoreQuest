@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { api, Profile } from '../src/api';
 import { colors, AVATAR_ASSETS, RANK_COLORS } from '../src/theme';
+import { AvatarView } from '../src/AvatarView';
 import { useSession } from '../src/session';
 
 export default function ProfileSelect() {
@@ -79,9 +80,7 @@ function HeroCard({ profile, onPress }: { profile: Profile; onPress: () => void 
 
   return (
     <Pressable onPress={onPress} testID={`hero-card-${profile.name}`} style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
-      <View style={[styles.avatarShield, { borderColor: avatar.color }]}>
-        <Text style={styles.avatarEmoji}>{avatar.emoji}</Text>
-      </View>
+      <AvatarView avatarClass={profile.avatar_class} avatarImage={profile.avatar_image} size={72} borderWidth={4} />
       <View style={{ flex: 1, marginLeft: 14 }}>
         <Text style={styles.cardName}>{profile.name}</Text>
         <Text style={styles.cardClass}>{avatar.label} · {avatar.tagline}</Text>

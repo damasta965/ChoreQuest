@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { api, Profile } from '../../src/api';
 import { colors, AVATAR_ASSETS } from '../../src/theme';
+import { AvatarView } from '../../src/AvatarView';
 import { Parchment, HeaderBanner, GoldButton, SectionTitle, StoneCard } from '../../src/ui';
 
 export default function Payouts() {
@@ -50,9 +51,7 @@ export default function Payouts() {
           return (
             <Parchment key={p.id} style={styles.card} testID={`payout-card-${p.name}`}>
               <View style={styles.row}>
-                <View style={[styles.avatar, { borderColor: a.color }]}>
-                  <Text style={{ fontSize: 26 }}>{a.emoji}</Text>
-                </View>
+                <AvatarView avatarClass={p.avatar_class} avatarImage={p.avatar_image} size={58} borderWidth={3} />
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.name}>{p.name}</Text>
                   <Text style={styles.sub}>Earned ${p.total_earned.toFixed(2)} · Paid ${p.total_paid.toFixed(2)}</Text>

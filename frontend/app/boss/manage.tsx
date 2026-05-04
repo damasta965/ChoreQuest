@@ -16,10 +16,11 @@ type Form = {
   gold: string;
   assigned_to: string;
   icon: string;
+  photo_required: boolean;
 };
 
 const DEFAULT_FORM: Form = {
-  title: '', description: '', category: 'daily', xp: '10', gold: '0.25', assigned_to: 'all', icon: 'scroll',
+  title: '', description: '', category: 'daily', xp: '10', gold: '0.25', assigned_to: 'all', icon: 'scroll', photo_required: false,
 };
 
 const ICON_CHOICES = ['scroll', 'bed', 'silverware-fork-knife', 'book-open-variant', 'dog', 'food-drumstick', 'tooth', 'trash-can', 'vacuum', 'shower', 'washing-machine', 'chef-hat', 'tree', 'car-wash', 'bookshelf', 'heart', 'sword', 'shield', 'hammer'];
@@ -41,7 +42,11 @@ export default function ManageQuests() {
 
   const openNew = () => { setForm(DEFAULT_FORM); setModalOpen(true); };
   const openEdit = (q: Quest) => {
-    setForm({ id: q.id, title: q.title, description: q.description, category: q.category, xp: String(q.xp), gold: String(q.gold), assigned_to: q.assigned_to, icon: q.icon });
+    setForm({
+      id: q.id, title: q.title, description: q.description, category: q.category,
+      xp: String(q.xp), gold: String(q.gold), assigned_to: q.assigned_to, icon: q.icon,
+      photo_required: !!q.photo_required,
+    });
     setModalOpen(true);
   };
 
@@ -55,6 +60,7 @@ export default function ManageQuests() {
       gold: parseFloat(form.gold) || 0,
       assigned_to: form.assigned_to,
       icon: form.icon,
+      photo_required: form.photo_required,
     };
     try {
       if (form.id) await api.updateQuest(form.id, payload);
@@ -100,7 +106,10 @@ export default function ManageQuests() {
               </View>
               <View style={{ flex: 1, marginLeft: 10 }}>
                 <Text style={styles.title}>{q.title}</Text>
-                <Text style={styles.sub}>{q.category} · +{q.xp} XP · ${q.gold.toFixed(2)} · {q.assigned_to === 'all' ? 'All Heroes' : (profiles.find(p => p.id === q.assigned_to)?.name || '—')}</Text>
+                <Text style={styles.sub}>
+                  {q.category} · +{q.xp} XP · ${q.gold.toFixed(2)} · {q.assigned_to === 'all' ? 'All Heroes' : (profiles.find(p => p.id === q.assigned_to)?.name || '—')}
+                  {q.photo_required ? ' · 📷' : ''}
+                </Text>
               </View>
             </View>
             <View style={styles.cardActions}>
@@ -150,6 +159,21 @@ export default function ManageQuests() {
                   </Pressable>
                 ))}
               </View>
+              <Label>Photo Proof</Label>
+              <Pressable
+                onPress={() => setForm({ ...form, photo_required: !form.photo_required })}
+                style={[styles.toggle, form.photo_required && styles.toggleOn]}
+                testID="form-photo-required"
+              >
+                <MaterialCommunityIcons
+                  name={form.photo_required ? 'camera-check' : 'camera-off'}
+                  size={18}
+                  color={form.photo_required ? '#000' : colors.parchment}
+                />
+                <Text style={[styles.toggleText, form.photo_required && { color: '#000' }]}>
+                  {form.photo_required ? 'Photo proof REQUIRED' : 'Photo proof optional'}
+                </Text>
+              </Pressable>
               <Label>Icon</Label>
               <View style={styles.iconGrid}>
                 {ICON_CHOICES.map((ic) => (
@@ -201,6 +225,9 @@ const styles = StyleSheet.create({
   segActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   segText: { color: colors.parchment, fontSize: 12, fontWeight: '700' },
   segTextActive: { color: '#000' },
+  toggle: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.stoneLight, backgroundColor: colors.bgCard },
+  toggleOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  toggleText: { color: colors.parchment, fontSize: 13, fontWeight: '700' },
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   iconBtn: { width: 44, height: 44, borderRadius: 8, borderWidth: 1, borderColor: colors.stoneLight, backgroundColor: colors.bgCard, alignItems: 'center', justifyContent: 'center' },
 });

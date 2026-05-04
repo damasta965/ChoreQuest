@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, Pressable, Alert, Modal, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -88,6 +88,15 @@ export default function BossApprovals() {
                   </View>
                 </View>
                 <Text style={styles.pendingTitle}>{c.quest_title}</Text>
+                {c.photo ? (
+                  <Pressable onPress={() => setPhotoView(c.photo!)} testID={`photo-thumb-${c.id}`} style={styles.photoThumbWrap}>
+                    <Image source={{ uri: c.photo }} style={styles.photoThumb} resizeMode="cover" />
+                    <View style={styles.photoOverlay}>
+                      <MaterialCommunityIcons name="magnify-plus" size={18} color={colors.parchment} />
+                      <Text style={styles.photoOverlayText}>Tap for proof</Text>
+                    </View>
+                  </Pressable>
+                ) : null}
                 <View style={styles.rewardsRow}>
                   <View style={styles.rewChip}>
                     <MaterialCommunityIcons name="star-four-points" size={14} color={colors.primary} />
@@ -147,6 +156,15 @@ export default function BossApprovals() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
+
+      <Modal visible={!!photoView} transparent animationType="fade" onRequestClose={() => setPhotoView(null)}>
+        <Pressable style={styles.photoModalBg} onPress={() => setPhotoView(null)}>
+          {photoView ? <Image source={{ uri: photoView }} style={styles.photoFull} resizeMode="contain" /> : null}
+          <Pressable onPress={() => setPhotoView(null)} style={styles.photoClose} testID="photo-close">
+            <MaterialCommunityIcons name="close" size={28} color={colors.parchment} />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -169,4 +187,11 @@ const styles = StyleSheet.create({
   historyTitle: { color: colors.parchment, fontSize: 13, fontWeight: '700' },
   historyMeta: { color: colors.inkMuted, fontSize: 11, marginTop: 2 },
   historyXP: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  photoThumbWrap: { marginBottom: 8, borderRadius: 8, overflow: 'hidden', borderWidth: 2, borderColor: colors.primaryDark },
+  photoThumb: { width: '100%', height: 160 },
+  photoOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', paddingVertical: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
+  photoOverlayText: { color: colors.parchment, fontSize: 11, fontWeight: '700' },
+  photoModalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', alignItems: 'center', justifyContent: 'center' },
+  photoFull: { width: '100%', height: '100%' },
+  photoClose: { position: 'absolute', top: 40, right: 20, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,0,0,0.5)', borderWidth: 2, borderColor: colors.parchment, alignItems: 'center', justifyContent: 'center' },
 });

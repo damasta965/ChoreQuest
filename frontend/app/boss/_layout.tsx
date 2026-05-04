@@ -29,6 +29,7 @@ export default function BossLayout() {
       <Tabs.Screen name="manage" options={{ title: 'Quests', tabBarIcon: ({ color }) => <MaterialCommunityIcons name="script-text-outline" size={24} color={color} /> }} />
       <Tabs.Screen name="payouts" options={{ title: 'Payouts', tabBarIcon: ({ color }) => <MaterialCommunityIcons name="treasure-chest" size={24} color={color} /> }} />
       <Tabs.Screen name="stats" options={{ title: 'Realm', tabBarIcon: ({ color }) => <MaterialCommunityIcons name="castle" size={24} color={color} /> }} />
+      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: ({ color }) => <MaterialCommunityIcons name="cog" size={24} color={color} /> }} />
     </Tabs>
   );
 }

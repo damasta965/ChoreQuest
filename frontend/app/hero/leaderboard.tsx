@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { api, Profile } from '../../src/api';
 import { colors, AVATAR_ASSETS, RANK_COLORS } from '../../src/theme';
+import { AvatarView } from '../../src/AvatarView';
 import { Parchment, HeaderBanner } from '../../src/ui';
 import { useSession } from '../../src/session';
 
@@ -41,9 +42,7 @@ export default function Leaderboard() {
                 />
                 <Text style={[styles.rankNum, { color: idx === 0 ? colors.primary : colors.ink }]}>#{idx + 1}</Text>
               </View>
-              <View style={[styles.avatar, { borderColor: avatar.color }]}>
-                <Text style={{ fontSize: 24 }}>{avatar.emoji}</Text>
-              </View>
+              <AvatarView avatarClass={p.avatar_class} avatarImage={p.avatar_image} size={54} borderWidth={3} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{p.name}{isMe ? ' (You)' : ''}</Text>
                 <View style={styles.metaRow}>
