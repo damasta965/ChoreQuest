@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://46649c8b-0e80-48b0-a4d4-dcdb96fd32bc.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://app.emergent.sh/share-preview?app=task-elden"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://46649c8b-0e80-48b0-a4d4-dcdb96fd32bc.preview.emergentagent.com"
+        "EXPO_PUBLIC_BACKEND_URL": "https://app.emergent.sh/share-preview?app=task-elden"
       }
     }
   },
