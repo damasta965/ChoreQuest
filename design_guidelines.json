@@ -1,0 +1,81 @@
+{
+  "theme": "dark",
+  "archetype": "5 (Jewel & Luxury) / 1 (Organic & Earthy) - Medieval RPG Theme",
+  "colors": {
+    "primary": "#D4AF37",
+    "primary_dark": "#A3862C",
+    "secondary": "#722F37",
+    "background_app": "#1A1C19",
+    "surface_parchment": "#F4EBD0",
+    "surface_parchment_dark": "#E2D4B2",
+    "accent_green": "#2E4A35",
+    "accent_blue": "#2A3B4C",
+    "text_on_dark": "#F4EBD0",
+    "text_on_parchment": "#2C2C2C",
+    "text_muted_on_parchment": "#5E5345",
+    "border_gold": "#D4AF37",
+    "border_wood": "#3A2818",
+    "xp_bar_fill": "#4CAF50",
+    "xp_bar_bg": "#1E1E1E"
+  },
+  "typography": {
+    "headings": "Cinzel, MedievalSharp, or Georgia (serif)",
+    "body": "Inter, Roboto, or standard sans-serif",
+    "hero_size": "text-4xl",
+    "h2_size": "text-2xl",
+    "h3_size": "text-xl",
+    "body_size": "text-base",
+    "letter_spacing_headings": "tracking-wide"
+  },
+  "layout_and_spacing": {
+    "global_padding": "p-4 or p-6 for mobile screens",
+    "card_padding": "p-5",
+    "gap": "gap-4",
+    "border_radius": "rounded-lg (subtle, medieval aesthetic avoids overly round shapes)",
+    "strategy": "The background should evoke a dark stone castle or tavern table (dark colors or texture). Floating elements like Quest Cards or Profiles should look like parchment scrolls (cream background, dark text, subtle brown/gold borders)."
+  },
+  "components": {
+    "buttons": "Solid royal gold (#D4AF37) or deep burgundy (#722F37) with text_on_dark. Use thick bottom borders (e.g. border-b-4) to simulate physical wooden or metal buttons. Press down animation.",
+    "cards": "Parchment colored surface (#F4EBD0). Dark text. Add border-2 border-[#A3862C] or brown to simulate framed paper.",
+    "avatars": "Circular or shield-shaped frames. Use thick gold borders (border-4 border-[#D4AF37]).",
+    "progress_bars": "XP bar should have a dark stone-like track (#1E1E1E) and a glowing green/gold fill. Use rounded-full but with a metallic/gold border wrapper.",
+    "icons": "Use @expo/vector-icons (FontAwesome5, MaterialCommunityIcons) for medieval props: shield, sword, crown, gem, scroll, coins."
+  },
+  "image_urls": [
+    {
+      "url": "https://images.unsplash.com/photo-1711107762183-d99536fb7d6e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTV8MHwxfHNlYXJjaHwxfHxtZWRpZXZhbCUyMHBhcmNobWVudCUyMHRleHR1cmV8ZW58MHx8fHwxNzc3ODY3NjQ0fDA&ixlib=rb-4.1.0&q=85",
+      "category": "background_parchment",
+      "description": "Aged parchment paper texture for quest cards and message boards."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1752972070089-48a477457f6c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzN8MHwxfHNlYXJjaHwxfHxkYXJrJTIwc3RvbmUlMjB3YWxsJTIwdGV4dHVyZXxlbnwwfHx8fDE3Nzc4Njc2NDR8MA&ixlib=rb-4.1.0&q=85",
+      "category": "background_stone",
+      "description": "Dark stone wall texture for the main app background or Boss Mode dashboard."
+    },
+    {
+      "url": "https://images.pexels.com/photos/14468442/pexels-photo-14468442.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "avatar_knight",
+      "description": "Medieval knight portrait for profile avatar selection (Knight class)."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1763296557023-853de43acadc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwc2hpZWxkfGVufDB8fHx8MTc3Nzg2NzY0NHww&ixlib=rb-4.1.0&q=85",
+      "category": "icon_shield",
+      "description": "Fantasy shield to represent rank badges (Squire, Knight, Legend)."
+    }
+  ],
+  "motion": {
+    "hover": "Not applicable for mobile React Native. Focus on Pressable interactions (scale down to 0.95 opacity 0.8 on press).",
+    "transitions": "Use standard React Navigation transitions, maybe add a bounce effect to level-up modals.",
+    "wheel_of_fate": "Implement a spin animation using React Native Animated for the rewards wheel."
+  },
+  "instructions_to_main_agent": [
+    "Design specifically for Expo React Native. Use pure React Native components (View, Text, Pressable, ScrollView, Animated).",
+    "Do NOT use HTML/CSS elements (div, span) or Tailwind web classes, you must use StyleSheet or NativeWind if configured, but prioritize standard React Native styling principles.",
+    "Maintain the medieval aesthetic: deep colors, parchment cards, gold accents.",
+    "Since custom fonts might require extra setup, if using standard text, use bold, serif styles or styled typography matching the medieval look. If you can load 'Cinzel' via expo-font, do so.",
+    "Implement PIN-protected profiles: Zach, Jacob, Boss Mode.",
+    "Implement Quest Board: Chores with XP and Gold values.",
+    "Ensure the UI feels gamified (XP bars, level badges, gear lockers).",
+    "Ensure ALL interactive elements (buttons, inputs, list items) have a 'data-testid' attribute (e.g., testID='quest-submit-button') for automated testing."
+  ]
+}
