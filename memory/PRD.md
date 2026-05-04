@@ -50,11 +50,11 @@ A medieval RPG-themed gamified chore tracker for kids. Kids complete chores as "
 
 ## Stack
 - Frontend: Expo SDK 54, React Native, expo-router, TypeScript, expo-image-picker
-- Backend: FastAPI + MongoDB (motor) + emergentintegrations (Gemini image gen)
+- Backend: FastAPI + MongoDB (motor) + google-genai (Gemini image gen)
 - Storage: AsyncStorage for session persistence
 
 ## Integrations
-- Gemini Nano Banana via Emergent Universal LLM Key (EMERGENT_LLM_KEY) — image generation only
+- Gemini Nano Banana 2 via Google AI Studio API (GOOGLE_API_KEY) — image generation only
 
 ## Routes
 - `/` — Profile select

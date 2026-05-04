@@ -4,18 +4,20 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timezone, date, timedelta
 import base64
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+from google import genai
+from google.genai import types as genai_types
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -322,8 +324,8 @@ async def generate_avatar(body: AvatarGenBody):
     profile = await db.profiles.find_one({"id": body.profile_id}, {"_id": 0})
     if not profile:
         raise HTTPException(404, "Profile not found")
-    if not EMERGENT_LLM_KEY:
-        raise HTTPException(500, "LLM key not configured")
+    if not GOOGLE_API_KEY:
+        raise HTTPException(500, "GOOGLE_API_KEY not configured")
 
     styled = (
         f"A medieval fantasy RPG character portrait, waist-up, facing slightly left. "
@@ -334,23 +336,31 @@ async def generate_avatar(body: AvatarGenBody):
     )
 
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=f"avatar-{body.profile_id}-{uuid.uuid4()}",
-            system_message="You generate medieval fantasy character portraits for a kids' chore app. Always produce a single image.",
+        client = genai.Client(api_key=GOOGLE_API_KEY)
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model="gemini-3.1-flash-image-preview",
+            contents=[styled],
+            config=genai_types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
         )
-        chat.with_model("gemini", "gemini-3.1-flash-image-preview").with_params(modalities=["image", "text"])
-        msg = UserMessage(text=styled)
-        _text, images = await chat.send_message_multimodal_response(msg)
     except Exception as e:
         logger.exception("Avatar gen failed")
         raise HTTPException(502, f"Image generation failed: {str(e)[:120]}")
 
-    if not images:
+    img_bytes = None
+    mime_type = "image/png"
+    for part in response.parts or []:
+        inline = getattr(part, "inline_data", None)
+        if inline and getattr(inline, "data", None):
+            img_bytes = inline.data
+            mime_type = getattr(inline, "mime_type", mime_type) or "image/png"
+            break
+
+    if not img_bytes:
         raise HTTPException(502, "No image returned")
 
-    img = images[0]
-    data_uri = f"data:{img.get('mime_type', 'image/png')};base64,{img['data']}"
+    b64 = base64.b64encode(img_bytes).decode("ascii")
+    data_uri = f"data:{mime_type};base64,{b64}"
 
     await db.profiles.update_one({"id": body.profile_id}, {"$set": {"avatar_image": data_uri}})
     updated = await db.profiles.find_one({"id": body.profile_id}, {"_id": 0, "pin": 0})

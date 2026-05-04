@@ -5,7 +5,7 @@
 # 1. Push this repo to GitHub
 # 2. Go to https://dashboard.render.com/blueprints → New Blueprint Instance
 # 3. Connect your repo → Render reads this file → click Apply
-# 4. Set the secret env vars (MONGO_URL, EMERGENT_LLM_KEY) when prompted
+# 4. Set the secret env vars (MONGO_URL, GOOGLE_API_KEY) when prompted
 # 5. Deploy
 
 services:
@@ -15,7 +15,7 @@ services:
     plan: free                # change to "starter" ($7/mo) for always-on, no cold start
     region: oregon            # closest to USA West; alternatives: ohio, frankfurt, singapore
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn server:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/
     autoDeploy: true
@@ -25,6 +25,6 @@ services:
       - key: DB_NAME
         value: chore_quest
       - key: MONGO_URL
-        sync: false             # you'll paste the MongoDB Atlas connection string in the Render UI
-      - key: EMERGENT_LLM_KEY
-        sync: false             # paste from /app/backend/.env in the Render UI
+        sync: false             # paste the MongoDB Atlas connection string in the Render UI
+      - key: GOOGLE_API_KEY
+        sync: false             # get a free key at https://aistudio.google.com → paste in Render UI
