@@ -15,6 +15,7 @@ export default function BossApprovals() {
   const [recent, setRecent] = useState<Completion[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [photoView, setPhotoView] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [p, all] = await Promise.all([
