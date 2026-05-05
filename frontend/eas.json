@@ -14,7 +14,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://app.emergent.sh/share-preview?app=task-elden"
+        "EXPO_PUBLIC_BACKEND_URL": "https://chore-quest-api-bo99.onrender.com"
       }
     },
     "production": {
@@ -22,7 +22,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_BACKEND_URL": "https://app.emergent.sh/share-preview?app=task-elden"
+        "EXPO_PUBLIC_BACKEND_URL": "https://chore-quest-api-bo99.onrender.com"
       }
     }
   },
