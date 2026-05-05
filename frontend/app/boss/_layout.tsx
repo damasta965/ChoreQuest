@@ -1,11 +1,13 @@
 import React from 'react';
 import { Tabs, Redirect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../../src/theme';
 import { useSession } from '../../src/session';
 
 export default function BossLayout() {
   const { profile } = useSession();
+  const insets = useSafeAreaInsets();
   if (!profile) return <Redirect href="/" />;
   if (profile.role !== 'boss') return <Redirect href="/hero/dashboard" />;
   return (
@@ -18,8 +20,8 @@ export default function BossLayout() {
           backgroundColor: colors.burgundyDark,
           borderTopWidth: 2,
           borderTopColor: colors.primary,
-          height: 68,
-          paddingBottom: 10,
+          height: 62 + insets.bottom,
+          paddingBottom: 6 + insets.bottom,
           paddingTop: 6,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
